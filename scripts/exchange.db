@@ -1,0 +1,16 @@
+CREATE DATABASE exchange;
+USE exchange;
+CREATE TABLE currency (
+    id         varchar,
+	code       varchar,
+	codeIn     varchar,
+	name       varchar,
+	high       varchar,
+	low        varchar,
+	varBid     varchar,
+	pctChange  varchar,
+	bid        varchar,
+	ask        varchar,
+	timestamp  varchar,
+	createDate varchar
+);

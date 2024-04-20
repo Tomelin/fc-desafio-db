@@ -1,0 +1,10 @@
+---
+webserver:
+  port: 8080
+  disable_http2: false
+  listen: 0.0.0.0
+database:
+  driver: sqlite3
+  host: ":memory:"
+  username: ""
+  password: ""
