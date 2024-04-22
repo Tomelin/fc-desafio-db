@@ -30,16 +30,16 @@ func NewConfig(f string) (*Config, error) {
 	err := viper.ReadInConfig()
 	if err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			panic(fmt.Errorf("error: %s", err.Error()))
+			return nil, fmt.Errorf("error: %s \n FILE_CONFIG environment must be setted to load .config/config.yaml file", err.Error())
 		} else {
-			panic(fmt.Errorf("fatal error config file: %w", err))
+			return nil, fmt.Errorf("fatal error config file: %s  \n FILE_CONFIG environment must be setted to load .config/config.yaml file", err.Error())
 		}
 
 	}
 	c := &Config{}
 	err = viper.Unmarshal(c)
 	if err != nil {
-		panic(fmt.Errorf("fatal error to make struct config: %w", err))
+		return nil, fmt.Errorf("fatal error to make struct config: %w", err)
 	}
 
 	return c, nil
