@@ -3,8 +3,10 @@ webserver:
   port: "8080"
   enabled_http2: true
   listen: 0.0.0.0
+  timeout: 200
 database:
   driver: "sqlite3"
-  host: "/tmp/fc-sqlite"
+  host: "./server.db"
   username: ""
   password: ""
+  timeout: 10

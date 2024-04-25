@@ -3,17 +3,12 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/Tomelin/fc-desafio-db/internal/core/entity"
+	"log"
+	"time"
 )
-
-//
-//type ExchangeRepositoryInterface interface {
-//	Create(exchange *entity.Exchange) error
-//	List() ([]entity.Exchange, error)
-//	Delete(id *string) error
-//	Update(exchange *entity.Exchange) error
-//}
 
 type ExchangeRepository struct {
 	DB  *sql.DB
@@ -24,29 +19,67 @@ func NewRepositoryExchange(ctx context.Context, db *sql.DB) (entity.ExchangeInte
 	return &ExchangeRepository{Ctx: ctx, DB: db}, nil
 }
 
-func (e *ExchangeRepository) Create(ex *entity.ResponseCurrency) (*entity.ResponseCurrency, error) {
+func (e *ExchangeRepository) Create(ctx context.Context, ex *entity.ResponseCurrency) (*entity.ResponseCurrency, error) {
 
-	query := fmt.Sprintf("INSERT INTO currency(id,code,codeIn, name, high, low, varBid,pctChange,bid,ask,timestamp,createDate) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s);", ex.Id, ex.Code, ex.CodeIn, ex.Name, ex.High, ex.Low, ex.VarBid, ex.PctChange, ex.Bid, ex.Ask, ex.Timestamp, ex.CreateDate)
-
-	request, err := e.DB.QueryContext(e.Ctx, query)
+	statement, err := e.DB.Prepare("INSERT INTO exchange(id, name, high, low, bid,timestamp) VALUES (?,?,?,?,?,?)")
 	if err != nil {
 		return nil, err
 	}
 
-	defer request.Close()
-	var result *entity.ResponseCurrency
-	for request.Next() {
-		err = request.Scan(&result.Id, &result.Code, &result.CodeIn, &result.Name, &result.High, &result.Low, &result.VarBid, &result.PctChange, &result.Bid, &result.Ask, &result.Timestamp, &result.CreateDate)
-		if err != nil {
-
-			return nil, err
+	timeout := ctx.Value("timeout").(map[string]int)
+	ctx, cancel := context.WithTimeout(ctx, time.Millisecond*time.Duration(timeout["db"]))
+	defer cancel()
+	//ctxx, cacnel := context.WithTimeout(ctx, time.Millisecond*1)
+	result, err := statement.ExecContext(ctx, ex.Id, ex.Name, ex.High, ex.Low, ex.Bid, ex.Timestamp)
+	if err != nil {
+		if err.Error() == "context deadline exceeded" {
+			return nil, fmt.Errorf("context deadline exceeded to exec SQL query")
 		}
+		return nil, err
+	}
+	_, err = result.RowsAffected()
+	if err != nil {
+		return nil, errors.New("error to insert exchange")
 	}
 
-	return result, nil
+	return ex, nil
 }
 
-func (e *ExchangeRepository) Get() ([]entity.Exchange, error) { return nil, nil }
+func (e *ExchangeRepository) Get() ([]entity.ResponseCurrency, error) {
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
+	rows, err := e.DB.QueryContext(ctx, "SELECT id, name, high, low, bid, timestamp FROM exchange")
+	if err != nil {
+		return nil, err
+	}
+
+	var exchanges []entity.ResponseCurrency
+	for rows.Next() {
+		var id string
+		var name string
+		var high string
+		var low string
+		var bid string
+		var timestamp string
+		log.Println(rows.Next())
+		log.Println(rows.Columns())
+		err := rows.Scan(&id, &name, &high, &low, &bid, &timestamp)
+		log.Println(err, id, name, high, low, bid, timestamp)
+
+		exchanges = append(exchanges, entity.ResponseCurrency{
+			Id: id,
+			RequestCurrency: entity.RequestCurrency{
+				Name:      name,
+				High:      high,
+				Low:       low,
+				Bid:       bid,
+				Timestamp: timestamp,
+			},
+		})
+	}
+	return exchanges, nil
+}
 
 func (e *ExchangeRepository) Delete(id *string) error { return nil }
 

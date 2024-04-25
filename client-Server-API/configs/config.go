@@ -9,6 +9,7 @@ type ConfigWebserver struct {
 	Port         string `json:"port" mapstructure:"port"`
 	EnabledHttp2 bool   `json:"disable_http2" mapstructure:"enabled_http2"`
 	Listen       string `json:"listen" mapstructure:"listen"`
+	Timeout      int    `json:"timeout" mapstructure:"timeout"`
 }
 
 type ConfigDatabase struct {
@@ -16,6 +17,7 @@ type ConfigDatabase struct {
 	Host     string `json:"host" mapstructure:"host"`
 	Username string `json:"username" mapstructure:"username"`
 	Password string `json:"password" mapstructure:"password"`
+	Timeout  int    `json:"timeout" mapstructure:"timeout"`
 }
 
 type Config struct {

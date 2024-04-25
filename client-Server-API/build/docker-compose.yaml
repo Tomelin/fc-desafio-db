@@ -1,1 +1,9 @@
 version: "3.8"
+
+services:
+  desafio:
+    build: .
+    volumes:
+      - ../:/app
+    hostname: desafio
+

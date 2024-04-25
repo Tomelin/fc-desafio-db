@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"context"
 	"errors"
 	"log/slog"
 	"reflect"
@@ -9,15 +10,15 @@ import (
 )
 
 type ExchangeInterface interface {
-	Get() ([]Exchange, error)
-	Create(exchange *ResponseCurrency) (*ResponseCurrency, error)
+	Get() ([]ResponseCurrency, error)
+	Create(ctx context.Context, exchange *ResponseCurrency) (*ResponseCurrency, error)
 	Delete(id *string) error
 	Update(*Exchange) (*Exchange, error)
 }
 
 type ResponseCurrency struct {
 	Id string `json:"id"`
-	*RequestCurrency
+	RequestCurrency
 }
 
 type ResponseBid string
@@ -37,7 +38,7 @@ type RequestCurrency struct {
 }
 
 type Exchange struct {
-	USDBRL *RequestCurrency
+	USDBRL *RequestCurrency `json:"USDBRL"`
 }
 
 func NewExchange(e *RequestCurrency) (*ResponseCurrency, error) {
@@ -49,7 +50,7 @@ func NewExchange(e *RequestCurrency) (*ResponseCurrency, error) {
 
 	return &ResponseCurrency{
 		Id:              uuid.New().String(),
-		RequestCurrency: e,
+		RequestCurrency: *e,
 	}, err
 }
 
