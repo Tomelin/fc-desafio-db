@@ -1,0 +1,13 @@
+---
+postgresql:
+  host: "192.168.0.115"
+  port: "5432"
+  database: desafio
+  username: admin
+  password: UE9TVEdSRVNfUEFTU1dPUkQK
+webserver:
+  port: "8443"
+  ssl_enabled: "false"
+  name: "api"
+  host: "0.0.0.0"
+  version: ""
