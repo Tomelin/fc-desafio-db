@@ -53,7 +53,7 @@ func NewRestAPI(pathConfigFile, nameConfigFile, nameFileExtension string) (*Rest
 	// }
 
 	rest := RestAPIConfig{
-		Port:       "8443",
+		Port:       v["port"].(string),
 		Host:       v["host"].(string),
 		Version:    v["version"].(string),
 		Name:       v["name"].(string),
@@ -74,7 +74,7 @@ func NewRestAPI(pathConfigFile, nameConfigFile, nameFileExtension string) (*Rest
 
 func (c *RestAPIConfig) Validate() {
 	if c.Port == "" {
-		c.Port = "8843"
+		c.Port = "8443"
 	}
 
 	if c.Host == "" {

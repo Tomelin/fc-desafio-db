@@ -21,7 +21,8 @@ func NewServiceOrder(repo repository.OrderRepositoryInterface) ServiceOrderInter
 }
 
 func (so *ServiceOrder) FindAll() ([]entity.OrderResponse, error) {
-	return nil, nil
+
+	return so.FindAll()
 }
 func (so *ServiceOrder) FindByFilter(*string) ([]entity.OrderResponse, error) {
 	return nil, nil

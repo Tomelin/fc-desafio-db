@@ -63,6 +63,5 @@ func main() {
 
 	handler_rest.NewOrderHandlerHttp(orderSvc, rest.RouterGroup)
 
-	log.Println(orderSvc)
 	rest.Run(rest.Route.Handler())
 }

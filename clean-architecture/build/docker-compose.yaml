@@ -1,12 +1,36 @@
 version: "3.8"
 
 services:
-#  app:
-#    build: ../
-#    volumes:
-#      - ./:/app
-#    ports:
-#      - "8080:8080"
+  app:
+    build: ./
+    hostname: desafio_app
+    container_name: desafio_app
+    volumes:
+      - ../:/app
+    ports:
+      - "8443:8443"
+    environment:
+      PATH_CONFIG: "/app/cmd/.config"
+    command: ["/usr/local/go/bin/go", "run", "/app/cmd/main.go"]
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.app.rule=Host(`app.docker.localhost`)"
+      - "traefik.http.routers.app.entrypoints=http"
+    depends_on:
+      - database
+  database:
+    hostname: desafio_database
+    container_name: desafio_database
+    image: postgres:12
+    # restart: always
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      POSTGRES_PASSWORD: UE9TVEdSRVNfUEFTU1dPUkQK
+      POSTGRES_USER: admin
+      POSTGRES_DB: desafio
   # jaeger:
   #   image: jaegertracing/all-in-one:latest
   #   hostname: jaeger
@@ -31,16 +55,7 @@ services:
   #     - RABBITMQ_DEFAULT_VHOST=0.0.0.0
 #  cache:
 #    hostname: cache
-  database:
-    hostname: db
-    image: postgres:12
-    # restart: always
-    ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_PASSWORD: UE9TVEdSRVNfUEFTU1dPUkQK
-      POSTGRES_USER: admin
-      POSTGRES_DB: desafio
+
 
 #  database-explore:
 #    hostname: dbexplorer

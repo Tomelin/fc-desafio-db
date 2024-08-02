@@ -2,6 +2,7 @@ package httpserver
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 
@@ -33,12 +34,13 @@ func prometheusHandler() gin.HandlerFunc {
 func (s *RestAPI) Run(handler http.Handler) error {
 
 	srv := http.Server{
-		Addr:    fmt.Sprintf(":%s", s.Config.Port),
+		Addr:    fmt.Sprintf("%s:%s", s.Config.Host, s.Config.Port),
 		Handler: s.Route.Handler(),
 	}
 
 	http2.ConfigureServer(&srv, &http2.Server{})
 	s.Route.Use(s.MiddlewareHeader)
+	log.Println(fmt.Sprintf("%s:%s", s.Config.Host, s.Config.Port))
 	return srv.ListenAndServe()
 }
 
