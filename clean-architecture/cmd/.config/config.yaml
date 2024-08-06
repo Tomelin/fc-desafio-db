@@ -1,6 +1,6 @@
 ---
-postgresql:
-  host: "192.168.0.115"
+database:
+  host: "192.168.0.116"
   port: "5432"
   database: desafio
   username: admin
@@ -11,3 +11,10 @@ webserver:
   name: "api"
   host: "0.0.0.0"
   version: ""
+cache:
+  port: "6379"
+  host: "redis"
+  password: "cmVkaXMtc2VydmVyCg"
+  database: 0
+graphql:
+  port: "8080"

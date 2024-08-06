@@ -1,0 +1,20 @@
+version: v2
+
+managed:
+  enabled: true
+  disable:
+     # Disables all go_package changes for this module only
+     - file_option: go_package
+       module: buf.build/bufbuild/protovalidate
+  override:
+    - file_option: go_package_prefix
+      value: grpc/order_pb
+plugins:
+  - remote: buf.build/protocolbuffers/go:v1.31.0
+    out: ../pkg
+  - remote: buf.build/bufbuild/validate-go
+    out: ../pkg
+  - remote: buf.build/grpc/go:v1.5.1
+    out: ../pkg
+inputs:
+  - directory: .

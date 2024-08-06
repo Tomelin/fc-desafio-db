@@ -1,0 +1,18 @@
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+type Query {
+  orders: [Order!]!
+  order(id: String!): Order
+}
+
+type Order {
+  id: String!
+  name: String!
+  description: String
+	stock: Int!
+	price: Float!
+	amount: Int!
+  category: Int
+}

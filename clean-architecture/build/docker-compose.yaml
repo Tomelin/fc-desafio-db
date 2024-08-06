@@ -1,28 +1,60 @@
 version: "3.8"
 
 services:
+  proxy:
+    image: traefik:v2.5
+    hostname: desafio_proxy
+    container_name: desafio_proxy
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.http.address=:80"
+      - "--entrypoints.https.address=:443"
+      - "--entrypoints.db.address=:5432"
+      - "--entrypoints.graphql.address=:8082"
+      - "--entrypoints.grpc.address=:50051"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+      # - "8082:8082"
+      # - "50051:50051"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
   app:
-    build: ./
+    image: docker.io/tomelin/desafio-fc:latest 
     hostname: desafio_app
     container_name: desafio_app
-    volumes:
-      - ../:/app
-    ports:
-      - "8443:8443"
+    # volumes:
+    #   - ../cmd:/app/cmd
     environment:
       PATH_CONFIG: "/app/cmd/.config"
-    command: ["/usr/local/go/bin/go", "run", "/app/cmd/main.go"]
+    command: ["ls", "/app"]
+    ports:
+      - "8443:8443"
+      - "8082:8082"
+      - "50051:50051"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.app.rule=Host(`app.docker.localhost`)"
+      - "traefik.http.routers.app.rule=Host(`desafio_app.docker.localhost`)"
       - "traefik.http.routers.app.entrypoints=http"
+      - "traefik.http.routers.app.service=service_app"
+      - "traefik.http.services.service_app.loadbalancer.server.port=8443"
+      - "traefik.tcp.routers.grpc.rule=Host(`desafio_grpc.docker.localhost`)"
+      - "traefik.tcp.routers.grpc.entrypoints=grpc"
+      - "traefik.tcp.routers.grpc.service=service_app_tcp"
+      - "traefik.tcp.services.service_app_tcp.loadbalancer.server.port=50051"
+      - "traefik.http.routers.graphql.rule=Host(`desafio_graphql.docker.localhost`)"
+      - "traefik.http.routers.graphql.entrypoints=graphql"
+      - "traefik.http.routers.graphql.service=service_app_graphql"
+      - "traefik.http.services.service_app_graphql.loadbalancer.server.port=8082"
     depends_on:
       - database
   database:
     hostname: desafio_database
     container_name: desafio_database
     image: postgres:12
-    # restart: always
     ports:
       - "5432:5432"
     volumes:
@@ -31,52 +63,26 @@ services:
       POSTGRES_PASSWORD: UE9TVEdSRVNfUEFTU1dPUkQK
       POSTGRES_USER: admin
       POSTGRES_DB: desafio
-  # jaeger:
-  #   image: jaegertracing/all-in-one:latest
-  #   hostname: jaeger
-  #   environment:
-  #     - COLLECTOR_OTLP_ENABLED=true
-  #   ports:
-  #     - "16686:16686"
-  #     - "6831:6831/udp"
-  #     - "6832:6832/udp"
-  #     - "4317:4317"
-  #     - "4318:4318"
-  # mqueue:
-  #   hostname: mqueue
-  #   image: rabbitmq:3.13-management
-  #   ports:
-  #     - "8080:8080"
-  #     - "15672:15672"
-  #     - "5672:5672"
-  #   environment:
-  #     - RABBITMQ_DEFAULT_USER=user
-  #     - RABBITMQ_DEFAULT_PASS=cGFzc3dvcmQK
-  #     - RABBITMQ_DEFAULT_VHOST=0.0.0.0
-#  cache:
-#    hostname: cache
-
-
-#  database-explore:
-#    hostname: dbexplorer
-#    image: mongo-express
-#    restart: always
-#    ports:
-#      - "8081:8081"
-#    environment:
-#      ME_CONFIG_MONGODB_ADMINUSERNAME: root
-#      ME_CONFIG_MONGODB_ADMINPASSWORD: example
-#      ME_CONFIG_MONGODB_URL: mongodb://root:example@database:27017/
-#      ME_CONFIG_BASICAUTH: false
-  # otel-collector:
-  #   image: otel/opentelemetry-collector-contrib
-  #   volumes:
-  #     - ./otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml
-  #   ports:
-  #     - "1888:1888" # pprof extension
-  #     - "8888:8888" # Prometheus metrics exposed by the Collector
-  #     - "8889:8889" # Prometheus exporter metrics
-  #     - "13133:13133" # health_check extension
-#      - "4317:4317" # OTLP gRPC receiver
-#      - "4318:4318" # OTLP http receiver
-#      - "55679:55679" # zpages extension
+  redis:
+    hostname: desafio_cache
+    container_name: desafio_cache
+    image: redis
+    command: redis-server --requirepass cmVkaXMtc2VydmVyCg --bind 0.0.0.0
+    environment:
+      - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
+    ports:
+      - "6379:6379"
+  redis-commander:
+    container_name: redis_admin
+    hostname: redis_admin
+    image: rediscommander/redis-commander:latest
+    restart: always
+    environment:
+      REDIS_HOSTS: redis
+      REDIS_HOST: redis
+      REDIS_PORT: redis:6379
+      REDIS_PASSWORD: cmVkaXMtc2VydmVyCg
+      HTTP_USER: admin
+      HTTP_PASSWORD: admin
+    ports:
+    - "8081:8081"

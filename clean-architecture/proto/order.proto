@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package pb;
+
+import "buf/validate/validate.proto";
+
+enum Category{
+  Software = 0;
+  HomeAutomation = 1;
+  BigData = 2;
+  Unknow = 3;  
+}
+
+message Order {
+  string name = 1 [(buf.validate.field).string.min_len = 1, (buf.validate.field).required = true];
+  string description = 2 [(buf.validate.field).required = false];
+  uint32 stock = 3 [(buf.validate.field).uint32.gt = 0];
+  float price = 4 [(buf.validate.field).float.gt = 0];
+  uint32 amount = 5 [(buf.validate.field).uint32.gt = 0];
+  Category category = 6 [(buf.validate.field).required = true];
+}
+
+message OrderResponse {
+  string id = 1 [(buf.validate.field).string.len = 36, (buf.validate.field).required = true];
+  Order Order = 2 [(buf.validate.field).required = true];
+}
+
+message ListOrderResponse {
+  repeated OrderResponse orders = 1;
+}
+
+message Filter {
+  string value = 1 [(buf.validate.field).required = true];
+}
+
+message IdRequest{
+  string id = 1 [(buf.validate.field).string.len = 36, (buf.validate.field).required = true];
+}
+
+message Empty{}
+
+service OrderService{
+  rpc FindAll(Empty) returns (ListOrderResponse) {}
+  rpc FindByFilter(Filter) returns (ListOrderResponse) {}
+  rpc FindByID(IdRequest) returns (OrderResponse) {}
+}

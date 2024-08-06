@@ -35,7 +35,7 @@ func NewDBConnection(ctx context.Context, pathConfigFile, nameConfigFile, nameFi
 	viper.SetConfigType(nameFileExtension)
 	viper.AutomaticEnv()
 
-	v, ok := viper.Get("postgresql").(map[string]interface{})
+	v, ok := viper.Get("database").(map[string]interface{})
 	if !ok {
 		return nil, errors.New("error, not found potsgres key at config file")
 	}
