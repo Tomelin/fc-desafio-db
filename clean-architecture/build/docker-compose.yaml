@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   proxy:
-    image: traefik:v2.5
+    image: traefik:v3.1.2
     hostname: desafio_proxy
     container_name: desafio_proxy
     command:
@@ -18,36 +18,25 @@ services:
       - "80:80"
       - "443:443"
       - "8080:8080"
-      # - "8082:8082"
-      # - "50051:50051"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
   app:
     image: docker.io/tomelin/desafio-fc:0.10.0 
     hostname: desafio_app
     container_name: desafio_app
-    # volumes:
-    #   - ../cmd:/app/cmd
-    # environment:
-    #   PATH_CONFIG: "/app/cmd/.config"
-    command: ["ls", "/app"]
-    ports:
-      - "8443:8443"
-      - "8082:8082"
-      - "50051:50051"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.app.rule=Host(`desafio_app.docker.localhost`)"
       - "traefik.http.routers.app.entrypoints=http"
       - "traefik.http.routers.app.service=service_app"
       - "traefik.http.services.service_app.loadbalancer.server.port=8443"
-      - "traefik.tcp.routers.grpc.rule=Host(`desafio_grpc.docker.localhost`)"
-      - "traefik.tcp.routers.grpc.entrypoints=grpc"
-      - "traefik.tcp.routers.grpc.service=service_app_tcp"
-      - "traefik.tcp.services.service_app_tcp.loadbalancer.server.port=50051"
-      - "traefik.http.routers.graphql.rule=Host(`desafio_graphql.docker.localhost`)"
-      - "traefik.http.routers.graphql.entrypoints=graphql"
-      - "traefik.http.routers.graphql.service=service_app_graphql"
+      - "traefik.http.routers.grpc.rule=Host(`desafio_grpc.docker.localhost`)"
+      - "traefik.http.routers.grpc.entrypoints=grpc"
+      - "traefik.http.routers.grpc.service=service_app_tcp"
+      - "traefik.http.services.service_app_tcp.loadbalancer.server.scheme=h2c"
+      - "traefik.http.services.service_app_tcp.loadbalancer.server.port=50051"
+      - "traefik.http.routers.app.rule=Host(`desafio_graphql.docker.localhost`)"
+      - "traefik.http.routers.app.service=service_app_graphql"
       - "traefik.http.services.service_app_graphql.loadbalancer.server.port=8082"
     depends_on:
       - database
