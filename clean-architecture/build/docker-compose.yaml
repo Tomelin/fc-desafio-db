@@ -38,6 +38,10 @@ services:
       - "traefik.http.routers.app.rule=Host(`desafio_graphql.docker.localhost`)"
       - "traefik.http.routers.app.service=service_app_graphql"
       - "traefik.http.services.service_app_graphql.loadbalancer.server.port=8082"
+    ports:
+      - "8443:8443"
+      - "8082:8082"
+      - "50051:50051"
     depends_on:
       - database
       - redis
