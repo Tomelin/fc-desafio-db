@@ -23,13 +23,13 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
   app:
-    image: docker.io/tomelin/desafio-fc:latest 
+    image: docker.io/tomelin/desafio-fc:0.10.0 
     hostname: desafio_app
     container_name: desafio_app
     # volumes:
     #   - ../cmd:/app/cmd
-    environment:
-      PATH_CONFIG: "/app/cmd/.config"
+    # environment:
+    #   PATH_CONFIG: "/app/cmd/.config"
     command: ["ls", "/app"]
     ports:
       - "8443:8443"
@@ -51,6 +51,7 @@ services:
       - "traefik.http.services.service_app_graphql.loadbalancer.server.port=8082"
     depends_on:
       - database
+      - redis
   database:
     hostname: desafio_database
     container_name: desafio_database

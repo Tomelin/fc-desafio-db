@@ -59,7 +59,7 @@ O arquivo config consiste na seguinte configuração:
 ```
 ---
 database:
-  host: "192.168.0.116"
+  host: "database"
   port: "5432"
   database: desafio
   username: admin
